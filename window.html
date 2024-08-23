@@ -5,12 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/style/window.css" />
     <title>창문 관리</title>
+    <link rel="icon" href="./image/bimoicon.png" />
   </head>
   <body></body>
   <div id="title-container">
     <h1>창문 관리</h1>
+    <div class="backbutton">< 뒤로 가기</div>
   </div>
-  <button>창문 열기</button>
-  <button>창문 닫기</button>
+  <div class="window-control__container">
+    <button class="window-control__button window-control__button--open">
+      창문 열기
+    </button>
+    <button class="window-control__button window-control__button--close">
+      창문 닫기
+    </button>
+  </div>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <!--<script src="/socket.io/socket.io.js"></script>-->
+  <script>
+    const socket = io("http://localhost:3001");
+    socket.on("connect", () => {
+      console.log("소켓 연결 성공");
+
+      document
+        .querySelector(".window-control__button--open")
+        .addEventListener("click", () => {
+          socket.emit("send-char", "w");
+        });
+      document
+        .querySelector(".window-control__button--close")
+        .addEventListener("click", () => {
+          socket.emit("send-char", "c");
+        });
+
+      document
+        .querySelector(".window-control__button--open")
+        .addEventListener("touchstart", () => {
+          socket.emit("send-char", "w");
+        });
+      document
+        .querySelector(".window-control__button--close")
+        .addEventListener("touchstart", () => {
+          socket.emit("send-char", "c");
+        });
+    });
+  </script>
   <script src="/js/window.js"></script>
 </html>

@@ -1,0 +1,19 @@
+.light-control__button--on {
+    border-radius: 15%;
+    padding: 20px;
+
+}
+
+.light-control__button--off {
+    border-radius: 15%;
+    padding: 20px;
+}
+.backbutton {
+    
+}
+h1 {
+    margin: 3px;
+    display: flex;
+    justify-content: center;
+}
+

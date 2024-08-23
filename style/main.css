@@ -2,7 +2,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background: linear-gradient(0.25turn, #C9E4C3,#C6FFD4,#4DB1A1);
+    background-color: #F8F8F8;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
@@ -28,7 +28,7 @@ a {
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    width: calc(50% - 30px);
+    width: calc(30%);
 }
 
 .card img {

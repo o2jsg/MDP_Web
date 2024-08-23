@@ -1,45 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>aigo-Things</title>
-    <link rel="stylesheet" href="./style/main.css" />
-    <script src="main.js"></script>
-    <script
-      src="https://kit.fontawesome.com/bf0ebfdd72.js"
-      crossorigin="anonymous"
-    ></script>
+    <title>손 주</title>
+    <link rel="icon" href="./image/bimoicon.png" />
+    <link rel="stylesheet" href="./style/style.css" />
   </head>
   <body>
-    <div class="header">
-      <h1>Aigo-Things</h1>
-    </div>
-    <div class="card">
-      <i class="fa-solid fa-house-chimney-window fa-2x"></i>
-      <!--<img src="device-image.jpg"/>-->
-      <a href="window.html"><h2>창문열기/닫기</h2></a>
-      <i class="enter_button1 fa-solid fa-play fa-2x"></i>
-    </div>
-
-    <div class="card">
-      <i class="fa-solid fa-lightbulb fa-2x"></i>
-      <a href="light.html"><h2>전등켜기/끄기</h2></a>
-      <i class="enter_button2 fa-solid fa-play fa-2x"></i>
-    </div>
-
-    <div class="card">
-      <i class="fa-solid fa-temperature-high fa-2x"></i>
-      <a href="./todayWeather.html"><h2>오늘의날씨</h2></a>
-      <i class="enter_button3 fa-solid fa-play fa-2x"></i>
-    </div>
-
-    <div class="card">
-      <i class="fa-solid fa-tablets fa-2x"></i>
-      <a href="medicine.html"><h2>약알리미</h2></a>
-      <i class="enter_button4 fa-solid fa-play fa-2x"></i>
-    </div>
-    <!-- Add more cards as needed -->
+    <div id="transcript">인식된 텍스트가 여기에 표시됩니다.</div>
+    <div id="openai-response">OpenAI 응답이 여기에 표시됩니다.</div>
+    <script>
+      document.addEventListener("click", () => {
+        window.location.href = "management.html";
+        console.log("클릭 이벤트 발생");
+      });
+    </script>
+    <script src="./js/index.js"></script>
   </body>
 </html>

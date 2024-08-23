@@ -1,13 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>약알리미</title>
-    <link rel="stylesheet" href="" />
+    <title>약 알리미</title>
+    <link rel="icon" href="./image/bimoicon.png" />
+    <link rel="stylesheet" href="/style/medicine.css" />
   </head>
   <body>
-    약 좀 무라
+    <div class="time-picker">
+      <div class="picker" id="ampmPicker">
+        <ul>
+          <li>오전</li>
+          <li>오후</li>
+        </ul>
+      </div>
+      <div class="picker" id="hourPicker">
+        <ul id="hourSettings"></ul>
+      </div>
+      <div class="picker" id="minutePicker">
+        <ul id="minuteSettings"></ul>
+      </div>
+      <button class="time-picker__button" id="setAlarmButton">알람 설정</button>
+    </div>
+    <script src="js/medicine.js"></script>
   </body>
-  <script src=""></script>
 </html>
