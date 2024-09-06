@@ -9,12 +9,19 @@
   </head>
   <body>
     <div id="title-container">
-      <h1>전등 관리</h1>
+      <span id="light-control-title">전등 제어</span>
       <div class="backbutton">< 뒤로 가기</div>
     </div>
     <div class="light-control-container">
       <button class="light-control__button--on">전등 켜기</button>
       <button class="light-control__button--off">전등 끄기</button>
+      <div id="light-smart-control-container">
+        <span>스마트제어모드</span>
+        <input type="checkbox" id="toggle" hidden />
+        <label for="toggle" class="toggleSwitch">
+          <span class="toggleButton"></span>
+        </label>
+      </div>
     </div>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <!--<script src="/socket.io/socket.io.js"></script>-->
@@ -33,6 +40,12 @@
           .addEventListener("click", () => {
             socket.emit("send-char", "f");
           });
+        document
+          .querySelector("#toggle")
+          .addEventListener("change", (event) => {
+            const char = event.target.checked ? "s" : "r";
+            socket.emit("send-char", char);
+          });
         // 갤럭시 탭으로 터치했을때
         document
           .querySelector(".light-control__button--on")
@@ -46,6 +59,6 @@
           });
       });
     </script>
-    <script src="./js/light.js"></script>
+    <script src="/js/light.js"></script>
   </body>
 </html>

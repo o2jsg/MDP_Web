@@ -1,0 +1,15 @@
+@import url("https://webfontworld.github.io/gmarket/GmarketSans.css");
+.window-control__button--open {
+  border-radius: 15%;
+  padding: 20px;
+}
+
+.window-control__button--close {
+  border-radius: 15%;
+  padding: 20px;
+}
+
+h1 {
+  display: flex;
+  justify-content: center;
+}

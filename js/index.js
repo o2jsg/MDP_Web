@@ -1,3 +1,20 @@
+// WebSocket 연결 (서버의 3001 포트)
+const socket = io("http://localhost:3001"); // WebSocket 연결
+
+const alarmSound = new Audio(
+  "../assets/music/약-드실시간이에요_-마지막-톤업.mp3"
+); // 알람 소리 파일
+
+// 서버에서 알람 트리거를 받으면 실행
+socket.on("alarm-triggered", (data) => {
+  alarmSound.play(); // 알람 소리 재생
+
+  // 알람 확인 메시지 표시, 확인 누르면 알람 소리 중지
+  if (confirm(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
+    alarmSound.pause(); // 알람 소리 중지
+  }
+});
+
 const conversationHistory = [];
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -14,53 +31,80 @@ window.addEventListener("DOMContentLoaded", () => {
 
   recognition.onresult = async (event) => {
     const transcript = event.results[0][0].transcript;
-    document.getElementById("transcript").textContent = transcript;
+    console.log("인식된 텍스트:", transcript);
 
     conversationHistory.push(`질문: ${transcript}`);
-    const recentHistory = conversationHistory.slice(-5);
 
-    try {
-      const response = await fetch("http://localhost:3000/api/openai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: transcript,
-          history: recentHistory, // 대화 히스토리 전송
-        }),
-      });
-
-      const data = await response.json();
-      const aiResponse = data.response;
-      document.getElementById("openai-response").textContent = aiResponse;
-
-      conversationHistory.push(`응답: ${aiResponse}`);
-
-      // TTS 설정 및 실행
-      const utterance = new SpeechSynthesisUtterance(aiResponse);
-      utterance.lang = "ko-KR";
-      utterance.volume = 1; // 음량 설정 (0.0 ~ 1.0)
-      utterance.rate = 1; // 속도 설정 (0.1 ~ 10)
-      utterance.pitch = 1; // 음높이 설정 (0 ~ 2)
-
-      // 한국어에 맞는 음성 선택
-      const voices = speechSynthesis.getVoices();
-      const selectedVoice = voices.find((voice) => voice.lang === "ko-KR");
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
+    // 특정 단어 감지
+    if (/도와줘|살려줘|도와주세요|살려주세요/.test(transcript)) {
+      try {
+        // React Native Expo 앱으로 신호 보내기
+        await fetch("http://localhost:3000/api/expoSignal", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: transcript,
+            timestamp: new Date().toISOString(),
+          }),
+        });
+        console.log("React Native Expo로 신호 전송 완료");
+      } catch (error) {
+        console.error("React Native Expo로 신호 전송 실패:", error);
       }
+    } else if (/현재 시간|시간 좀 알려줘|몇 시야/.test(transcript)) {
+      // 현재 시간 가져오기
+      const now = new Date();
+      const currentTime = `${now.getHours()}시 ${now.getMinutes()}분입니다.`;
 
+      // TTS로 시간 읽기
+      const utterance = new SpeechSynthesisUtterance(currentTime);
+      utterance.lang = "ko-KR";
       speechSynthesis.speak(utterance);
-    } catch (error) {
-      console.error("Error during API call:", error);
-      document.getElementById("openai-response").textContent =
-        "Error: OpenAI API에서 응답을 가져올 수 없습니다.";
+      console.log("현재 시간:", currentTime);
+    } else {
+      // OpenAI API 호출 (모든 대화 기록 전송)
+      try {
+        const response = await fetch("http://localhost:3000/api/openai", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: transcript,
+            history: conversationHistory, // 전체 대화 히스토리 전송
+          }),
+        });
+
+        const data = await response.json();
+        const aiResponse = data.response;
+        console.log("OpenAI 응답:", aiResponse);
+
+        conversationHistory.push(`응답: ${aiResponse}`);
+
+        // TTS 설정 및 실행
+        const utterance = new SpeechSynthesisUtterance(aiResponse);
+        utterance.lang = "ko-KR";
+        utterance.volume = 1;
+        utterance.rate = 2;
+        utterance.pitch = 2;
+
+        const voices = speechSynthesis.getVoices();
+        const selectedVoice = voices.find((voice) => voice.lang === "ko-KR");
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
+
+        speechSynthesis.speak(utterance);
+      } catch (error) {
+        console.error("OpenAI API 호출 중 오류 발생:", error);
+      }
     }
   };
 
   recognition.onerror = (event) => {
-    console.error("음성 인식 오류가 발생하였습니다: ", event.error);
+    console.error("음성 인식 오류 발생:", event.error);
   };
 
   recognition.onend = () => {
@@ -69,7 +113,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   recognition.onaudioend = () => {
-    console.log("오디오 캡쳐가 종료되었습니다");
+    console.log("오디오 캡쳐 종료");
   };
 
   recognition.onnomatch = () => {
@@ -77,7 +121,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   recognition.onspeechend = () => {
-    console.log("음성이 감지되지 않았습니다");
+    console.log("음성 입력이 종료되었습니다");
   };
 
   console.log("음성 인식 시작");

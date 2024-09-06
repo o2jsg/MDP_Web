@@ -1,22 +1,126 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>손 주</title>
+    <title>제어 페이지</title>
     <link rel="icon" href="./image/bimoicon.png" />
-    <link rel="stylesheet" href="./style/style.css" />
+    <link rel="stylesheet" href="/style/main.css" />
   </head>
   <body>
-    <div id="transcript">인식된 텍스트가 여기에 표시됩니다.</div>
-    <div id="openai-response">OpenAI 응답이 여기에 표시됩니다.</div>
+    <div class="dashboard">
+      <div class="weather-air-quality">
+        <div class="weather">
+          <div class="temperature">
+            <div id="weather-icon" class="icon">🌞</div>
+            <div class="details">
+              <div id="temperature" class="temp">24°C</div>
+              <div id="weather-status" class="status">맑음</div>
+            </div>
+          </div>
+          <div class="extra">
+            <div id="humidity" class="humidity">
+              습도<br /><strong>60%</strong>
+            </div>
+            <div id="air-quality" class="fine-dust">
+              미세먼지<br /><strong>12 µg/m³</strong>
+            </div>
+          </div>
+        </div>
+        <div class="weekly-forecast">
+          <div class="forecast-title">주간 날씨</div>
+          <div id="forecast-list" class="forecast-list">
+            <!-- Forecast items will be injected here -->
+          </div>
+        </div>
+      </div>
+      <div class="lighting">
+        <div class="section-title">전등 제어</div>
+        <div class="control-buttons">
+          <div class="lighting-item light-control__button--on">💡 켜짐</div>
+          <div class="lighting-item light-control__button--off">💤 꺼짐</div>
+          <!-- Light off icon -->
+        </div>
+      </div>
+      <div class="windows">
+        <div class="section-title">창문 제어</div>
+        <div class="control-buttons">
+          <div class="window-control__button--open">🪟 열림</div>
+          <div class="window-control__button--close">🪟 닫힘</div>
+          <div class="toggle-container">
+            <div class="toggle-label">스마트 제어모드</div>
+            <div class="toggle-switch">
+              <span class="toggle-text">꺼짐</span>
+              <input type="checkbox" id="toggle" />
+              <label for="toggle"></label>
+              <span class="toggle-text">켜짐</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="medication">
+        <div class="section-title">약 알리미</div>
+        <button class="time-button" onclick="location.href='medicine.html'">
+          시간 설정하기 <span class="icon">🕒</span>
+        </button>
+      </div>
+    </div>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="/js/main.js"></script>
     <script>
-      document.addEventListener("click", () => {
-        window.location.href = "management.html";
-        console.log("클릭 이벤트 발생");
+      const socket = io("http://localhost:3001");
+      socket.on("connect", () => {
+        console.log("소켓 연결 성공");
+
+        document
+          .querySelector(".light-control__button--on")
+          .addEventListener("click", () => {
+            socket.emit("send-char", "n");
+          });
+        document
+          .querySelector(".light-control__button--off")
+          .addEventListener("click", () => {
+            socket.emit("send-char", "f");
+          });
+        document
+          .querySelector(".window-control__button--open")
+          .addEventListener("click", () => {
+            socket.emit("send-char", "w");
+          });
+        document
+          .querySelector(".window-control__button--close")
+          .addEventListener("click", () => {
+            socket.emit("send-char", "c");
+          });
+
+        document
+          .querySelector(".window-control__button--open")
+          .addEventListener("touchstart", () => {
+            socket.emit("send-char", "w");
+          });
+        document
+          .querySelector(".window-control__button--close")
+          .addEventListener("touchstart", () => {
+            socket.emit("send-char", "c");
+          });
+        document
+          .querySelector("#toggle")
+          .addEventListener("change", (event) => {
+            const char = event.target.checked ? "s" : "r";
+            socket.emit("send-char", char);
+          });
+        // 갤럭시 탭으로 터치했을때
+        document
+          .querySelector(".light-control__button--on")
+          .addEventListener("touchstart", () => {
+            socket.emit("send-char", "n");
+          });
+        document
+          .querySelector(".light-control__button--off")
+          .addEventListener("touchstart", () => {
+            socket.emit("send-char", "f");
+          });
       });
     </script>
-    <script src="./js/index.js"></script>
   </body>
 </html>

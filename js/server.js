@@ -1,15 +1,19 @@
 import "dotenv/config";
+import bodyParser from "body-parser";
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import http from "http";
 import path from "path";
+import mongoose from "mongoose";
 import { fileURLToPath } from "url";
 import { Server } from "socket.io";
 import { SerialPort } from "serialport";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const rootDir = path.resolve(__dirname, "..");
 
 const app = express();
 const server = http.createServer(app);
@@ -22,10 +26,117 @@ const io = new Server(server, {
 
 const apiPort = 3000;
 const wsPort = 3001;
+const mongoUri = process.env.MONGODB_URI;
 
 app.use(cors());
 app.use(express.json());
 
+console.log("MongoDB URI:", mongoUri); // 환경 변수 출력
+if (!mongoUri) {
+  throw new Error("MongoDB URI가 설정되지 않았습니다. .env 파일을 확인하세요.");
+}
+mongoose
+  .connect(mongoUri)
+  .then(() => {
+    console.log("MongoDB에 성공적으로 연결되었습니다.");
+  })
+  .catch((err) => {
+    console.error("MongoDB 연결 중 오류 발생:", err);
+  });
+// MongoDB 연결
+mongoose
+  .connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("MongoDB에 성공적으로 연결되었습니다.");
+  })
+  .catch((err) => {
+    console.error("MongoDB 연결 중 오류 발생:", err);
+  });
+// 알람 스키마 정의
+const alarmSchema = new mongoose.Schema({
+  hour: Number,
+  minute: Number,
+  ampmChecker: String,
+  days: [Number],
+});
+
+const Alarm = mongoose.model("Alarm", alarmSchema);
+
+// 알림 저장 API (POST)
+app.post("/api/alarms", async (req, res) => {
+  const { hour, minute, ampmChecker, days } = req.body;
+  const newAlarm = new Alarm({ hour, minute, ampmChecker, dasys });
+  try {
+    await newAlarm.save();
+    res.status(201).json({ success: true, data: newAlarm });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+// 저장된 알람 불러오기 API (GET)
+app.get("/api/alarms", async (req, res) => {
+  try {
+    const alarms = await Alarm.find({});
+    res.json(alarms);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// 알람 삭제 API
+app.delete("/api/alarms/:id", async (req, res) => {
+  try {
+    const alarmId = req.params.id;
+    await Alarm.findByIdAndDelete(alarmId);
+    res.status(200).json({ message: "알람 삭제 완료" });
+  } catch (err) {
+    res.status(500).json({ message: "알람 삭제 오류", error: err });
+  }
+});
+// WebSocket을 사용해 알람을 실시간 전송
+io.on("connection", (socket) => {
+  console.log("유저가 연결되었습니다.");
+
+  checkAlarms(socket); // 유저 연결 시 알람 체크 시작
+
+  socket.on("disconnect", () => {
+    console.log("유저가 연결을 끊었습니다.");
+  });
+});
+// 알람 시간 체크 함수 (MongoDB에서 알람 불러와 확인)
+function checkAlarms(socket) {
+  setInterval(async () => {
+    const currentDate = new Date();
+    const currentHour = currentDate.getHours();
+    const currentMinute = currentDate.getMinutes();
+    const currentDay = currentDate.getDay();
+    const currentAmPm = currentHour >= 12 ? "PM" : "AM";
+    const adjustedHour = currentHour % 12 || 12;
+
+    try {
+      const alarms = await Alarm.find({});
+      alarms.forEach((alarm) => {
+        if (
+          alarm.hour === adjustedHour &&
+          alarm.minute === currentMinute &&
+          alarm.ampmChecker === currentAmPm &&
+          alarm.days.includes(currentDay)
+        ) {
+          // 알람 시간이 되면 모든 클라이언트로 알람 전송
+          socket.emit("alarm-triggered", {
+            time: `${alarm.ampmChecker} ${alarm.hour}:${alarm.minute}`,
+          });
+        }
+      });
+    } catch (err) {
+      console.error("알람 확인 중 오류 발생:", err);
+    }
+  }, 60000); // 1분마다 알람 확인
+}
+
+// OPENAI API 호출
 app.post("/api/openai", async (req, res) => {
   const { prompt, history } = req.body;
 
@@ -45,6 +156,7 @@ app.post("/api/openai", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        //Authorization: `Bearer sk-proj-wrfIcUSCevzGuCOPPilMT3BlbkFJa1GnlHpdKeDVi9r1roKY`,
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
