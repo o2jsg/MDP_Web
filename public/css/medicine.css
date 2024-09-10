@@ -109,6 +109,12 @@ body {
   padding: 5px 15px;
   cursor: pointer;
 }
+.backbutton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  cursor: pointer;
+}
 .button {
   border-radius: 50px;
 }

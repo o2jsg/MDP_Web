@@ -1,39 +1,38 @@
 import fetch from "node-fetch";
+import dotenv from "dotenv";
 
-export const handleOpenAIRequest = async (req, res) => {
-  const { prompt, history } = req.body;
-
+dotenv.config();
+export const getOpenAIResponse = async (prompt, history) => {
   const fullPrompt = `
-    최근 대화 요약:
+    다음 대화 내용을 바탕으로 질문에 대해 답해주세요: 
     ${history.join("\n")}
     
-    다음 질문에 대해 대답해주세요: ${prompt}
+    질문: ${prompt}
   `;
 
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "system", content: fullPrompt }],
-        max_tokens: 500,
-      }),
-    });
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: fullPrompt }],
+      max_tokens: 500,
+      temperature: 1,
+      top_p: 1,
+      frequency_penalty: 0.5,
+      presence_penalty: 0.5,
+    }),
+  });
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    res.json({ response: data.choices[0].message.content });
-  } catch (error) {
-    console.error("OpenAI API 호출 오류:", error);
-    res
-      .status(500)
-      .json({ error: "Could not fetch response from OpenAI API." });
+  if (!response.ok) {
+    throw new Error(
+      `OpenAI API 에러: ${response.status} ${response.statusText}`
+    );
   }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
 };

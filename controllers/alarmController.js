@@ -1,4 +1,5 @@
 import { Alarm } from "../models/alarm.js";
+import dotenv from "dotenv";
 
 // 알람 저장
 export const createAlarm = async (req, res) => {

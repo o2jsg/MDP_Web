@@ -1,15 +1,25 @@
 import express from "express";
-import {
-  createAlarm,
-  getAlarms,
-  deleteAlarm,
-} from "../controllers/alarmController.js";
+import { Alarm } from "../models/alarm.js"; // 알람 스키마
 
 const router = express.Router();
 
-// 알람 API
-router.post("/alarms", createAlarm);
-router.get("/alarms", getAlarms);
-router.delete("/alarms/:id", deleteAlarm);
+router.post("/", async (req, res) => {
+  try {
+    const newAlarm = new Alarm(req.body);
+    await newAlarm.save();
+    res.status(201).json({ success: true, data: newAlarm });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
 
-export default router;
+router.get("/", async (req, res) => {
+  try {
+    const alarms = await Alarm.find({});
+    res.json(alarms);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+export const alarmRoutes = router;

@@ -1,11 +1,12 @@
 import { sendCharToSerialPort } from "./serialPortController.js";
+import { Alarm } from "../models/alarm.js"; // Alarm 모델 불러오기
 
 // WebSocket 연결 설정 및 이벤트 처리
-export const handleWebSocketConnection = (io) => {
+export const setupWebSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("유저가 연결되었습니다.");
 
-    // 알람 체크 및 전송 예시 (외부에서 호출할 수 있게 추가)
+    // 알람 체크 및 전송
     startAlarmCheck(socket);
 
     // 클라이언트로부터 문자 수신
@@ -21,7 +22,7 @@ export const handleWebSocketConnection = (io) => {
   });
 };
 
-// 알람 체크 함수: 일정 시간마다 알람 확인 후, 클라이언트로 알람 전송
+// 알람 체크 함수
 const startAlarmCheck = (socket) => {
   setInterval(async () => {
     const currentDate = new Date();

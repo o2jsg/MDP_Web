@@ -1,9 +1,16 @@
 import express from "express";
-import { handleOpenAIRequest } from "../controllers/openaiController.js";
+import { getOpenAIResponse } from "../controllers/openaiController.js";
 
 const router = express.Router();
 
-// OpenAI API
-router.post("/openai", handleOpenAIRequest);
+router.post("/", async (req, res) => {
+  try {
+    const { prompt, history } = req.body;
+    const aiResponse = await getOpenAIResponse(prompt, history);
+    res.json({ response: aiResponse });
+  } catch (error) {
+    res.status(500).json({ error: "OpenAI API 호출 에러" });
+  }
+});
 
-export default router;
+export const openaiRoutes = router;
