@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>제어 페이지</title>
-    <link rel="icon" href="./image/bimoicon.png" />
-    <link rel="stylesheet" href="/style/main.css" />
+    <link rel="icon" href="/image/bimoicon.png" />
+    <link rel="stylesheet" href="/css/main.css" />
   </head>
   <body>
     <div class="dashboard">
@@ -68,7 +68,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="/js/main.js"></script>
     <script>
-      const socket = io("http://localhost:3001");
+      //const socket = io("http://localhost:3001");
       socket.on("connect", () => {
         console.log("소켓 연결 성공");
 

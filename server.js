@@ -1,5 +1,4 @@
 import "dotenv/config";
-import bodyParser from "body-parser";
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
@@ -163,6 +162,10 @@ app.post("/api/openai", async (req, res) => {
         model: "gpt-4o-mini",
         messages: [{ role: "system", content: fullPrompt }],
         max_tokens: 500,
+        temperature: 1,
+        top_p: 0.9,
+        frequency_penalty: 0.5,
+        presence_penalty: 0.6,
       }),
     });
 
@@ -197,7 +200,7 @@ serialPort.on("error", (err) => {
 });
 
 // 정적 파일 제공
-app.use(express.static(path.join(__dirname, "..")));
+app.use(express.static(path.join(__dirname, "public")));
 
 // 클라이언트가 연결되었을 때
 io.on("connection", (socket) => {

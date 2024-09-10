@@ -1,9 +1,7 @@
 // WebSocket 연결 (서버의 3001 포트)
 const socket = io("http://localhost:3001"); // WebSocket 연결
 
-const alarmSound = new Audio(
-  "../assets/music/약-드실시간이에요_-마지막-톤업.mp3"
-); // 알람 소리 파일
+const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
 
 // 서버에서 알람 트리거를 받으면 실행
 socket.on("alarm-triggered", (data) => {
