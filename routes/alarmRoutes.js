@@ -22,4 +22,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedAlarm = await Alarm.findByIdAndDelete(id);
+    if (!deletedAlarm) {
+      return res
+        .status(404)
+        .json({ success: false, message: "알람을 찾을 수 없습니다." });
+    }
+    res.status(200).json({ success: true, message: "알람이 삭제되었습니다." });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 export const alarmRoutes = router;

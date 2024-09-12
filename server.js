@@ -9,7 +9,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 
 console.log("Current directory:", resolve());
-
+import { createAlarm, getAlarms } from "./controllers/alarmController.js"; // 알람 컨트롤러 임포트
 import { sendCharToSerialPort } from "./controllers/serialPortController.js";
 import { connectMongoDB } from "./config/config.js"; // DB 설정
 import { setupWebSocket } from "./controllers/websocketController.js"; // WebSocket 설정

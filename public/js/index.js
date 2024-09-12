@@ -34,22 +34,26 @@ window.addEventListener("DOMContentLoaded", () => {
     conversationHistory.push(`질문: ${transcript}`);
 
     // 특정 단어 감지
+    // App Inventor로 신호 보내기
     if (/도와줘|살려줘|도와주세요|살려주세요/.test(transcript)) {
       try {
-        // React Native Expo 앱으로 신호 보내기
-        await fetch("http://localhost:3000/api/expoSignal", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: transcript,
-            timestamp: new Date().toISOString(),
-          }),
-        });
-        console.log("React Native Expo로 신호 전송 완료");
+        // App Inventor로 HTTP 요청 전송
+        await fetch(
+          "http://[AppInventor_Endpoint_IP]:[PORT]/api/app_inventor",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              message: transcript,
+              timestamp: new Date().toISOString(),
+            }),
+          }
+        );
+        console.log("App Inventor로 신호 전송 완료");
       } catch (error) {
-        console.error("React Native Expo로 신호 전송 실패:", error);
+        console.error("App Inventor로 신호 전송 실패:", error);
       }
     } else if (/현재 시간|시간 좀 알려줘|몇 시야/.test(transcript)) {
       // 현재 시간 가져오기
@@ -125,3 +129,9 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("음성 인식 시작");
   recognition.start();
 });
+/*
+  const displayGPTResponse = (response) => {
+    const responseContainer = document.getElementById("gpt-response");
+    responseContainer.innerHTML = ""; // 이전 응답 초기화
+    responseContainer.innerText = response; // 새 응답 표시
+  };*/

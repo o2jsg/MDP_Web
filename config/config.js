@@ -10,10 +10,7 @@ export const connectMongoDB = () => {
   }
 
   mongoose
-    .connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
+    .connect(mongoUri)
     .then(() => {
       console.log("MongoDB에 성공적으로 연결되었습니다.");
     })
