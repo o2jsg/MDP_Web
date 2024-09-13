@@ -1,7 +1,7 @@
 // controllers/serialPortController.js
 import { SerialPort } from "serialport";
 
-const portName = process.env.SERIAL_PORT || "COM4";
+const portName = process.env.SERIAL_PORT || "COM7";
 const baudRate = parseInt(process.env.BAUD_RATE) || 9600;
 
 export const serialPort = new SerialPort({

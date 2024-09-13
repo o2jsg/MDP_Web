@@ -32,19 +32,33 @@ const startAlarmCheck = (socket) => {
     const currentAmPm = currentHour >= 12 ? "PM" : "AM";
     const adjustedHour = currentHour % 12 || 12;
 
+    // 현재 시각 로그 출력
+    console.log(`현재 시각: ${adjustedHour}:${currentMinute}, ${currentAmPm}`);
+    console.log(`현재 요일: ${currentDay}`);
+
     try {
       const alarms = await Alarm.find({});
+      console.log(`저장된 알람: ${JSON.stringify(alarms)}`);
+
       alarms.forEach((alarm) => {
+        // 알람 시간 확인 로그 출력
+        console.log(
+          `알람 시간 확인: ${alarm.hour}:${alarm.minute}, ${alarm.ampmChecker}`
+        );
+
         if (
           alarm.hour === adjustedHour &&
           alarm.minute === currentMinute &&
           alarm.ampmChecker === currentAmPm &&
-          alarm.days.includes(currentDay)
+          (alarm.days.includes(currentDay) || alarm.days.includes(7))
         ) {
+          console.log("알람 트리거: 알람 시간이 일치합니다!");
+
           // 알람 시간이 되면 클라이언트로 알람 전송
           socket.emit("alarm-triggered", {
             time: `${alarm.ampmChecker} ${alarm.hour}:${alarm.minute}`,
           });
+          console.log("알람 트리거: 클라이언트로 알람 전송");
         }
       });
     } catch (err) {

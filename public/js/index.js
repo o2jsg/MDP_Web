@@ -1,10 +1,21 @@
 // WebSocket 연결 (서버의 3001 포트)
 const socket = io("http://localhost:3001"); // WebSocket 연결
 
+// WebSocket 연결 성공 여부 확인
+socket.on("connect", () => {
+  console.log("WebSocket 연결 성공");
+});
+
+// WebSocket 연결 실패 시
+socket.on("connect_error", (error) => {
+  console.error("WebSocket 연결 실패:", error);
+});
+
 const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
 
 // 서버에서 알람 트리거를 받으면 실행
 socket.on("alarm-triggered", (data) => {
+  console.log("알람 트리거 발생: ", data);
   alarmSound.play(); // 알람 소리 재생
 
   // 알람 확인 메시지 표시, 확인 누르면 알람 소리 중지
@@ -35,22 +46,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // 특정 단어 감지
     // App Inventor로 신호 보내기
-    if (/도와줘|살려줘|도와주세요|살려주세요/.test(transcript)) {
+    if (/도와 줘|살려줘|도와 주세요|살려주세요/.test(transcript)) {
       try {
         // App Inventor로 HTTP 요청 전송
-        await fetch(
-          "http://[AppInventor_Endpoint_IP]:[PORT]/api/app_inventor",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              message: transcript,
-              timestamp: new Date().toISOString(),
-            }),
-          }
-        );
+        await fetch("http://192.168.0.32:6381/api/app_inventor", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: transcript,
+            timestamp: new Date().toISOString(),
+          }),
+        });
         console.log("App Inventor로 신호 전송 완료");
       } catch (error) {
         console.error("App Inventor로 신호 전송 실패:", error);

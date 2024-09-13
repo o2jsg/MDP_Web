@@ -1,18 +1,53 @@
 document.addEventListener("DOMContentLoaded", () => {
   const socket = io("http://localhost:3001");
+
+  // WebSocket 연결 상태 확인
+  socket.on("connect", () => {
+    console.log("WebSocket 연결 성공");
+  });
+
+  socket.on("disconnect", () => {
+    console.log("WebSocket 연결 해제");
+  });
+
   const alarmSound = new Audio("/music/medicine.mp3");
 
+  // 오디오 파일 로드 확인
+  alarmSound.addEventListener("canplaythrough", () => {
+    console.log("오디오 파일이 로드되었습니다.");
+  });
+
+  alarmSound.addEventListener("error", (e) => {
+    console.error("오디오 파일 로드 중 오류 발생:", e);
+  });
+
   socket.on("alarm-triggered", (data) => {
-    alarmSound.play();
+    console.log("알람이 트리거되었습니다:", data);
+
     if (confirm(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
-      alarmSound.pause();
+      console.log("사용자가 알람을 멈췄습니다.");
+      alarmSound.pause(); // 알람 소리 중지
+    } else {
+      console.log("알람 소리를 재생합니다.");
+
+      // 사용자 상호작용 이후에 알람 소리 재생 시도
+      alarmSound
+        .play()
+        .then(() => {
+          console.log("알람 소리 재생 시작");
+        })
+        .catch((error) => {
+          console.error("알람 소리 재생 중 오류 발생:", error);
+        });
     }
   });
 
+  // '뒤로가기' 버튼 처리
   document.getElementById("backButton").addEventListener("click", () => {
     window.history.back();
   });
 
+  // 알람 설정 버튼 처리
   document.querySelector("#setAlarmButton").addEventListener("click", () => {
     const ampmPicker = document.querySelector("#ampmPicker ul li.selected");
     const hourPicker = document.querySelector("#hourPicker ul li.selected");
@@ -45,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
+          console.log("알람 저장 완료:", data);
           alert("알람이 저장되었습니다.");
           loadAlarms(); // 알람 목록 갱신
         } else {
@@ -61,20 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("/api/alarms")
       .then((response) => response.json())
       .then((alarms) => {
-        const alarmItems = document.querySelector("#alarmItems");
-        alarmItems.innerHTML = ""; // 기존 알람 목록 초기화
-        alarms.forEach((alarm) => {
-          const li = document.createElement("li");
-          li.textContent = `${alarm.hour}:${alarm.minute} ${alarm.ampmChecker} - ${alarm.days}`;
-          const deleteButton = document.createElement("button");
-          deleteButton.className = "deleteButton";
-          deleteButton.textContent = "삭제";
-          deleteButton.addEventListener("click", () => {
-            deleteAlarm(alarm._id);
-          });
-          li.appendChild(deleteButton);
-          alarmItems.appendChild(li);
-        });
+        console.log("저장된 알람 목록:", alarms);
+        displayAlarms(alarms);
       });
   }
 
@@ -90,6 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .then((data) => {
         if (data.success) {
+          console.log("알람 삭제 완료:", data);
           alert("알람이 삭제되었습니다.");
           loadAlarms(); // 알람 목록 갱신
         } else {
@@ -100,6 +125,23 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error:", error);
         alert("알람 삭제 중 오류가 발생했습니다.");
       });
+  }
+
+  function displayAlarms(alarms) {
+    const alarmList = document.getElementById("alarmItems");
+    alarmList.innerHTML = ""; // 기존 알람 목록 초기화
+    alarms.forEach((alarm) => {
+      const li = document.createElement("li");
+      li.textContent = `${alarm.hour}:${alarm.minute} ${alarm.ampmChecker} - ${alarm.days}`;
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "deleteButton";
+      deleteButton.textContent = "삭제";
+      deleteButton.addEventListener("click", () => {
+        deleteAlarm(alarm._id);
+      });
+      li.appendChild(deleteButton);
+      alarmList.appendChild(li);
+    });
   }
 
   loadAlarms(); // 페이지 로드 시 알람 목록 불러오기
@@ -119,12 +161,12 @@ document.addEventListener("DOMContentLoaded", () => {
     minuteSettings.appendChild(minuteItem);
   }
 
-  function initPicker(pickerId) {
+  function initPicker(pickerId, initialIndex) {
     const picker = document.getElementById(pickerId);
     const ul = picker.querySelector("ul");
     const liElements = ul.querySelectorAll("li");
 
-    let selectedIndex = Math.floor(liElements.length / 2);
+    let selectedIndex = initialIndex;
     let startY = 0;
     let currentY = 0;
     let isDragging = false;
@@ -177,9 +219,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSelectedClass(liElements, selectedIndex);
   }
 
-  initPicker("hourPicker");
-  initPicker("minutePicker");
-  initPicker("ampmPicker");
+  initPicker("hourPicker", 0); // 오전 1시부터 설정
+  initPicker("minutePicker", 0); // 00분부터 설정
+  initPicker("ampmPicker", 0); // 오전부터 설정
 });
 
 function displayAlarms(alarms) {

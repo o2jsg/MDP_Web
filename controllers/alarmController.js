@@ -14,8 +14,14 @@ const daysMap = {
 // 알람 저장
 export const createAlarm = async (req, res) => {
   const { hour, minute, ampmChecker, days } = req.body;
+
+  // days 배열이 비어있으면 [7]로 대체
   const daysArray = days.length === 0 ? [7] : days;
+
+  // days 배열을 텍스트로 변환
   const daysString = daysArray.map((day) => daysMap[day]).join(", ");
+
+  // 알람 객체 생성
   const newAlarm = new Alarm({ hour, minute, ampmChecker, days: daysString });
 
   try {
@@ -29,12 +35,20 @@ export const createAlarm = async (req, res) => {
   }
 };
 
-// 알람 조회
 export const getAlarms = async (req, res) => {
   try {
     console.log("알람 조회");
     const alarms = await Alarm.find({});
-    res.json(alarms);
+
+    // 요일 숫자를 문자열로 변환
+    const alarmsWithDaysString = alarms.map((alarm) => {
+      const daysString = alarm.days
+        .map((day) => daysMap[day] || "매일")
+        .join(", ");
+      return { ...alarm._doc, days: daysString };
+    });
+
+    res.json(alarmsWithDaysString);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

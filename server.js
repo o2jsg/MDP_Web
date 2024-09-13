@@ -7,7 +7,6 @@ import { Server } from "socket.io";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
 import path from "path";
-
 console.log("Current directory:", resolve());
 import { createAlarm, getAlarms } from "./controllers/alarmController.js"; // 알람 컨트롤러 임포트
 import { sendCharToSerialPort } from "./controllers/serialPortController.js";
@@ -47,6 +46,28 @@ app.use(express.static(path.join(__dirname, "public")));
 // 서버 시작
 const apiPort = process.env.API_PORT || 3000;
 const wsPort = process.env.WS_PORT || 3001;
+
+// WebSocket 설정 부분에 추가
+io.on("connection", (socket) => {
+  console.log("클라이언트가 연결되었습니다.");
+
+  // 강제 트리거 테스트
+  setTimeout(() => {
+    io.emit("alarm-triggered", { time: "10:00 AM" });
+    console.log("강제 알람 트리거 발생");
+  }, 5000); // 5초 후에 알람 트리거
+
+  // 클라이언트로부터 문자 수신
+  socket.on("send-char", (char) => {
+    console.log("클라이언트로부터 문자 수신:", char);
+    sendCharToSerialPort(char); // Serial Port로 문자 전송
+  });
+
+  // 연결 해제 처리
+  socket.on("disconnect", () => {
+    console.log("유저 연결 해제");
+  });
+});
 
 server.listen(apiPort, () => {
   console.log(`Server is running on http://localhost:${apiPort}`);
