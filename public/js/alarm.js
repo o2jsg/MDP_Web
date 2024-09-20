@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  let alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
+  let alarmPlaying = false; // 알람이 재생 중인지 확인하는 변수
+
   const socket = io("http://localhost:3001");
 
   // WebSocket 연결 상태 확인
@@ -10,8 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("WebSocket 연결 해제");
   });
 
-  const alarmSound = new Audio("/music/medicine.mp3");
-
   // 오디오 파일 로드 확인
   alarmSound.addEventListener("canplaythrough", () => {
     console.log("오디오 파일이 로드되었습니다.");
@@ -21,24 +22,37 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("오디오 파일 로드 중 오류 발생:", e);
   });
 
+  // 서버에서 알람 트리거 이벤트 수신
   socket.on("alarm-triggered", (data) => {
     console.log("알람이 트리거되었습니다:", data);
 
-    if (confirm(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
-      console.log("사용자가 알람을 멈췄습니다.");
-      alarmSound.pause(); // 알람 소리 중지
-    } else {
-      console.log("알람 소리를 재생합니다.");
+    // 오디오 재생 함수
+    const playAlarm = () => {
+      if (!alarmPlaying) {
+        alarmSound.currentTime = 0; // 알람 소리 처음부터 재생
+        alarmSound.loop = true; // 알람 소리를 계속 반복
+        alarmSound
+          .play()
+          .then(() => {
+            console.log("알람 소리 재생 시작");
+            alarmPlaying = true;
+          })
+          .catch((error) => {
+            console.error("알람 소리 재생 중 오류 발생:", error);
+          });
+      }
+    };
 
-      // 사용자 상호작용 이후에 알람 소리 재생 시도
-      alarmSound
-        .play()
-        .then(() => {
-          console.log("알람 소리 재생 시작");
-        })
-        .catch((error) => {
-          console.error("알람 소리 재생 중 오류 발생:", error);
-        });
+    // 알람 소리 재생
+    playAlarm();
+
+    // alert 창 표시
+    if (alert(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
+      // 사용자가 확인을 누르면 알람 중지
+      console.log("사용자가 알람을 멈췄습니다.");
+      alarmSound.pause();
+      alarmSound.currentTime = 0;
+      alarmPlaying = false;
     }
   });
 
@@ -132,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
     alarmList.innerHTML = ""; // 기존 알람 목록 초기화
     alarms.forEach((alarm) => {
       const li = document.createElement("li");
-      li.textContent = `${alarm.hour}:${alarm.minute} ${alarm.ampmChecker} - ${alarm.days}`;
+      li.textContent = `${alarm.ampmChecker} ${alarm.hour}:${alarm.minute} - ${alarm.days}`;
       const deleteButton = document.createElement("button");
       deleteButton.className = "deleteButton";
       deleteButton.textContent = "삭제";

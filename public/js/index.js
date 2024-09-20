@@ -1,5 +1,7 @@
 // WebSocket 연결 (서버의 3001 포트)
 const socket = io("http://localhost:3001"); // WebSocket 연결
+const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
+const conversationHistory = [];
 
 // WebSocket 연결 성공 여부 확인
 socket.on("connect", () => {
@@ -11,20 +13,16 @@ socket.on("connect_error", (error) => {
   console.error("WebSocket 연결 실패:", error);
 });
 
-const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
-
 // 서버에서 알람 트리거를 받으면 실행
 socket.on("alarm-triggered", (data) => {
   console.log("알람 트리거 발생: ", data);
   alarmSound.play(); // 알람 소리 재생
 
   // 알람 확인 메시지 표시, 확인 누르면 알람 소리 중지
-  if (confirm(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
+  if (alert(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
     alarmSound.pause(); // 알람 소리 중지
   }
 });
-
-const conversationHistory = [];
 
 window.addEventListener("DOMContentLoaded", () => {
   const SpeechRecognition =
@@ -33,7 +31,6 @@ window.addEventListener("DOMContentLoaded", () => {
     console.error("이 브라우저에서는 Web Speech API를 지원하지 않습니다.");
     return;
   }
-
   const recognition = new SpeechRecognition();
   recognition.lang = "ko-KR";
   recognition.interimResults = false;
@@ -119,7 +116,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   recognition.onend = () => {
     console.log("음성 인식 종료. 다시 시작합니다...");
-    recognition.start();
+    setTimeout(() => {
+      recognition.start();
+    }, 100);
   };
 
   recognition.onaudioend = () => {

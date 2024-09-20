@@ -8,7 +8,7 @@ socket.on("alarm-triggered", (data) => {
   alarmSound.play(); // 알람 소리 재생
 
   // 알람 확인 메시지 표시, 확인 누르면 알람 소리 중지
-  if (confirm(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
+  if (alert(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
     alarmSound.pause(); // 알람 소리 중지
   }
 });
@@ -18,7 +18,7 @@ let inactivityTimeout;
 function pageRollbackTimer() {
   inactivityTimeout = setTimeout(() => {
     history.back();
-  }, 15000);
+  }, 20000);
 }
 
 function resetTimer() {
@@ -34,6 +34,26 @@ window.addEventListener("load", pageRollbackTimer);
 const DEFAULT_LAT = 37.46369169; // 인천 미추홀구의 위도
 const DEFAULT_LON = 126.6502972; // 인천 미추홀구의 경도
 const API_KEY = "2496a945d5aba6b1ae5b53ddecb57bcd"; // OpenWeather API 키를 여기에 입력
+
+async function fetchWithRetry(url, retries = 3) {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      console.log(`API 호출 시도 ${attempt + 1}: ${url}`);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`API 응답 에러: ${response.status}`);
+      }
+      return await response.json(); // 성공적으로 데이터를 받아오면 반환
+    } catch (error) {
+      console.error(`API 호출 실패 (시도 ${attempt + 1}), 에러:`, error);
+      if (attempt === retries - 1) {
+        throw error; // 최대 시도 횟수를 초과하면 에러를 다시 throw
+      }
+      // 잠시 대기 후 재시도
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1초 대기
+    }
+  }
+}
 
 function getCoordinatesAndFetchWeather() {
   if (navigator.geolocation) {
@@ -63,14 +83,8 @@ function getCoordinatesAndFetchWeather() {
 
 async function fetchWeather(lat, lon) {
   const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`;
-
   try {
-    console.log(`API 호출: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`API 응답 에러: ${response.status}`);
-    }
-    const data = await response.json();
+    const data = await fetchWithRetry(url); // 재시도 로직 사용
     console.log("날씨 데이터 가져오기 성공", data);
     displayCurrentWeather(data);
   } catch (error) {
@@ -80,14 +94,8 @@ async function fetchWeather(lat, lon) {
 
 async function fetchAirQuality(lat, lon) {
   const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
-
   try {
-    console.log(`미세먼지 API 호출: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`미세먼지 API 응답 에러: ${response.status}`);
-    }
-    const data = await response.json();
+    const data = await fetchWithRetry(url); // 재시도 로직 사용
     console.log("미세먼지 데이터 가져오기 성공", data);
     displayAirQuality(data.list[0].components.pm2_5);
   } catch (error) {
@@ -97,14 +105,8 @@ async function fetchAirQuality(lat, lon) {
 
 async function fetchWeeklyForecast(lat, lon) {
   const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`;
-
   try {
-    console.log(`주간 날씨 API 호출: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`주간 날씨 API 응답 에러: ${response.status}`);
-    }
-    const data = await response.json();
+    const data = await fetchWithRetry(url); // 재시도 로직 사용
     console.log("주간 날씨 데이터 가져오기 성공", data);
     processWeeklyForecast(data.list);
   } catch (error) {
@@ -136,10 +138,6 @@ function processWeeklyForecast(list) {
   forecastContainer.innerHTML = "";
 
   Object.keys(dailyData).forEach((day, index) => {
-    const currentDay = new Date().toLocaleDateString("ko-KR", {
-      weekday: "long",
-    });
-
     if (index > 0 && index < 6) {
       // 오늘 이후부터 5일간의 데이터만 표시
       const avgTemp = (dailyData[day].temp / dailyData[day].count).toFixed(1);

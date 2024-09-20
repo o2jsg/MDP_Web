@@ -2,18 +2,18 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import http from "http";
-import mongoose from "mongoose";
 import { Server } from "socket.io";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
 import path from "path";
 console.log("Current directory:", resolve());
-import { createAlarm, getAlarms } from "./controllers/alarmController.js"; // 알람 컨트롤러 임포트
 import { sendCharToSerialPort } from "./controllers/serialPortController.js";
 import { connectMongoDB } from "./config/config.js"; // DB 설정
 import { setupWebSocket } from "./controllers/websocketController.js"; // WebSocket 설정
 import { alarmRoutes } from "./routes/alarmRoutes.js"; // 알람 관련 라우트
 import { openaiRoutes } from "./routes/openaiRoutes.js"; // OpenAI API 라우트
+//import mongoose from "mongoose";
+//import { createAlarm, getAlarms } from "./controllers/alarmController.js"; // 알람 컨트롤러 임포트
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,10 +52,10 @@ io.on("connection", (socket) => {
   console.log("클라이언트가 연결되었습니다.");
 
   // 강제 트리거 테스트
-  setTimeout(() => {
-    io.emit("alarm-triggered", { time: "10:00 AM" });
-    console.log("강제 알람 트리거 발생");
-  }, 5000); // 5초 후에 알람 트리거
+  // setTimeout(() => {
+  //   io.emit("alarm-triggered", { time: "10:00 AM" });
+  //   console.log("강제 알람 트리거 발생");
+  // }, 5000); // 5초 후에 알람 트리거
 
   // 클라이언트로부터 문자 수신
   socket.on("send-char", (char) => {
