@@ -35,22 +35,47 @@ const DEFAULT_LAT = 37.46369169; // 인천 미추홀구의 위도
 const DEFAULT_LON = 126.6502972; // 인천 미추홀구의 경도
 const API_KEY = "2496a945d5aba6b1ae5b53ddecb57bcd"; // OpenWeather API 키를 여기에 입력
 
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 8000 } = options; // 기본 타임아웃 8초
+  const controller = new AbortController();
+  const id = setTimeout(() => {
+    console.log("요청 타임아웃: 요청이 취소됩니다.");
+    controller.abort(); // 타임아웃 발생 시 요청 취소
+  }, timeout);
+
+  try {
+    const response = await fetch(resource, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(id); // 성공 시 타임아웃 클리어
+    return response; // 응답 반환
+  } catch (error) {
+    if (error.name === "AbortError") {
+      console.error("요청이 타임아웃 되었습니다.");
+    }
+    throw error; // 다른 에러는 다시 throw
+  }
+}
+
 async function fetchWithRetry(url, retries = 3) {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       console.log(`API 호출 시도 ${attempt + 1}: ${url}`);
-      const response = await fetch(url);
+      const response = await fetchWithTimeout(url, { timeout: 15000 }); // 타임아웃 8초 적용
       if (!response.ok) {
         throw new Error(`API 응답 에러: ${response.status}`);
       }
-      return await response.json(); // 성공적으로 데이터를 받아오면 반환
+      return await response.json(); // 성공 시 데이터 반환
     } catch (error) {
       console.error(`API 호출 실패 (시도 ${attempt + 1}), 에러:`, error);
-      if (attempt === retries - 1) {
-        throw error; // 최대 시도 횟수를 초과하면 에러를 다시 throw
+      if (error.name === "AbortError") {
+        console.error("타임아웃 발생으로 재시도 중...");
       }
-      // 잠시 대기 후 재시도
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1초 대기
+      if (attempt === retries - 1) {
+        throw error; // 마지막 시도 실패 시 에러 throw
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1초 대기 후 재시도
     }
   }
 }

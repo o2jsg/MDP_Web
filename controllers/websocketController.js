@@ -6,9 +6,6 @@ export const setupWebSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("유저가 연결되었습니다.");
 
-    // 알람 체크 및 전송
-    startAlarmCheck(socket);
-
     // 클라이언트로부터 문자 수신
     socket.on("send-char", (char) => {
       console.log("클라이언트로부터 문자 수신:", char);
@@ -20,6 +17,8 @@ export const setupWebSocket = (io) => {
       console.log("유저 연결 해제");
     });
   });
+  // 알람 체크 및 전송
+  startAlarmCheck(io);
 };
 
 // 알람 체크 함수
