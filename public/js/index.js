@@ -1,5 +1,5 @@
-// WebSocket 연결 (서버의 3001 포트)
-const socket = io("http://localhost:3001"); // WebSocket 연결
+// WebSocket 연결 (서버의 3000 포트)
+const socket = io("http://localhost:3000"); // WebSocket 연결
 const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
 const conversationHistory = [];
 
@@ -19,7 +19,7 @@ socket.on("alarm-triggered", (data) => {
   alarmSound.play(); // 알람 소리 재생
 
   // 알람 확인 메시지 표시, 확인 누르면 알람 소리 중지
-  if (alert(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
+  if (confirm(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
     alarmSound.pause(); // 알람 소리 중지
   }
 });
@@ -94,8 +94,8 @@ window.addEventListener("DOMContentLoaded", () => {
         const utterance = new SpeechSynthesisUtterance(aiResponse);
         utterance.lang = "ko-KR";
         utterance.volume = 1;
-        utterance.rate = 2;
-        utterance.pitch = 2;
+        utterance.rate = 1.2; // 속도를 약간 낮춤
+        utterance.pitch = 1.5; // 음 높이를 조절
 
         const voices = speechSynthesis.getVoices();
         const selectedVoice = voices.find((voice) => voice.lang === "ko-KR");
@@ -136,6 +136,7 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("음성 인식 시작");
   recognition.start();
 });
+
 /*
   const displayGPTResponse = (response) => {
     const responseContainer = document.getElementById("gpt-response");

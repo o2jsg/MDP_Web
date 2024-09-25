@@ -1,5 +1,5 @@
 // WebSocket 연결 (서버의 3001 포트)
-const socket = io("http://localhost:3001"); // WebSocket 연결
+const socket = io("http://localhost:3000"); // WebSocket 연결
 
 const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
 
@@ -33,50 +33,52 @@ window.addEventListener("load", pageRollbackTimer);
 
 const DEFAULT_LAT = 37.46369169; // 인천 미추홀구의 위도
 const DEFAULT_LON = 126.6502972; // 인천 미추홀구의 경도
-const API_KEY = "2496a945d5aba6b1ae5b53ddecb57bcd"; // OpenWeather API 키를 여기에 입력
 
-async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 8000 } = options; // 기본 타임아웃 8초
-  const controller = new AbortController();
-  const id = setTimeout(() => {
-    console.log("요청 타임아웃: 요청이 취소됩니다.");
-    controller.abort(); // 타임아웃 발생 시 요청 취소
-  }, timeout);
-
+async function fetchWeather(lat, lon) {
+  const url = `/api/weather/current?lat=${lat}&lon=${lon}`;
   try {
-    const response = await fetch(resource, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(id); // 성공 시 타임아웃 클리어
-    return response; // 응답 반환
-  } catch (error) {
-    if (error.name === "AbortError") {
-      console.error("요청이 타임아웃 되었습니다.");
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`서버 응답 에러: ${response.status}`);
     }
-    throw error; // 다른 에러는 다시 throw
+    const data = await response.json();
+    console.log("날씨 데이터 가져오기 성공", data);
+    displayCurrentWeather(data);
+  } catch (error) {
+    console.error("날씨 데이터를 가져오는 중 오류가 발생했습니다.", error);
+    showErrorMessage("날씨 데이터를 가져오는 데 실패했습니다.");
   }
 }
 
-async function fetchWithRetry(url, retries = 3) {
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      console.log(`API 호출 시도 ${attempt + 1}: ${url}`);
-      const response = await fetchWithTimeout(url, { timeout: 15000 }); // 타임아웃 8초 적용
-      if (!response.ok) {
-        throw new Error(`API 응답 에러: ${response.status}`);
-      }
-      return await response.json(); // 성공 시 데이터 반환
-    } catch (error) {
-      console.error(`API 호출 실패 (시도 ${attempt + 1}), 에러:`, error);
-      if (error.name === "AbortError") {
-        console.error("타임아웃 발생으로 재시도 중...");
-      }
-      if (attempt === retries - 1) {
-        throw error; // 마지막 시도 실패 시 에러 throw
-      }
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1초 대기 후 재시도
+async function fetchAirQuality(lat, lon) {
+  const url = `/api/weather/air_quality?lat=${lat}&lon=${lon}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`서버 응답 에러: ${response.status}`);
     }
+    const data = await response.json();
+    console.log("미세먼지 데이터 가져오기 성공", data);
+    displayAirQuality(data.list[0].components.pm2_5);
+  } catch (error) {
+    console.error("미세먼지 데이터를 가져오는 중 오류가 발생했습니다.", error);
+    showErrorMessage("미세먼지 데이터를 가져오는 데 실패했습니다.");
+  }
+}
+
+async function fetchWeeklyForecast(lat, lon) {
+  const url = `/api/weather/weekly_forecast?lat=${lat}&lon=${lon}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`서버 응답 에러: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("주간 날씨 데이터 가져오기 성공", data);
+    processWeeklyForecast(data.list);
+  } catch (error) {
+    console.error("주간 날씨 데이터를 가져오는 중 오류가 발생했습니다.", error);
+    showErrorMessage("주간 날씨 데이터를 가져오는 데 실패했습니다.");
   }
 }
 
@@ -103,39 +105,6 @@ function getCoordinatesAndFetchWeather() {
     fetchWeather(DEFAULT_LAT, DEFAULT_LON);
     fetchAirQuality(DEFAULT_LAT, DEFAULT_LON); // 기본 위치에서 미세먼지 데이터 가져오기
     fetchWeeklyForecast(DEFAULT_LAT, DEFAULT_LON); // 기본 위치에서 주간 날씨 데이터 가져오기
-  }
-}
-
-async function fetchWeather(lat, lon) {
-  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`;
-  try {
-    const data = await fetchWithRetry(url); // 재시도 로직 사용
-    console.log("날씨 데이터 가져오기 성공", data);
-    displayCurrentWeather(data);
-  } catch (error) {
-    console.error("날씨 데이터를 가져오는 중 오류가 발생했습니다.", error);
-  }
-}
-
-async function fetchAirQuality(lat, lon) {
-  const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
-  try {
-    const data = await fetchWithRetry(url); // 재시도 로직 사용
-    console.log("미세먼지 데이터 가져오기 성공", data);
-    displayAirQuality(data.list[0].components.pm2_5);
-  } catch (error) {
-    console.error("미세먼지 데이터를 가져오는 중 오류가 발생했습니다.", error);
-  }
-}
-
-async function fetchWeeklyForecast(lat, lon) {
-  const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`;
-  try {
-    const data = await fetchWithRetry(url); // 재시도 로직 사용
-    console.log("주간 날씨 데이터 가져오기 성공", data);
-    processWeeklyForecast(data.list);
-  } catch (error) {
-    console.error("주간 날씨 데이터를 가져오는 중 오류가 발생했습니다.", error);
   }
 }
 
@@ -249,6 +218,14 @@ function displayAirQuality(pm25) {
   document.getElementById(
     "air-quality"
   ).innerHTML = `미세먼지<br /><strong>${pm25} µg/m³ (${airQuality})</strong>`;
+}
+
+function showErrorMessage(message) {
+  const errorDiv = document.getElementById("error");
+  if (errorDiv) {
+    errorDiv.textContent = message;
+    errorDiv.style.display = "block";
+  }
 }
 
 // 최초로 날씨 정보와 미세먼지 정보 및 주간 날씨 가져오기

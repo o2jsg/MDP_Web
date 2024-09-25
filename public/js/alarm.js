@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
   let alarmPlaying = false; // 알람이 재생 중인지 확인하는 변수
 
-  const socket = io("http://localhost:3001");
+  const socket = io("http://localhost:3000");
 
   // WebSocket 연결 상태 확인
   socket.on("connect", () => {

@@ -1,3 +1,4 @@
+// websocketController.js
 import { sendCharToSerialPort } from "./serialPortController.js";
 import { Alarm } from "../models/alarm.js"; // Alarm 모델 불러오기
 
@@ -12,12 +13,20 @@ export const setupWebSocket = (io) => {
       sendCharToSerialPort(char); // Serial Port로 문자 전송
     });
 
+    // STM으로부터 데이터 수신 (예시)
+    socket.on("stm-data", (data) => {
+      console.log("STM으로부터 데이터 수신:", data);
+      // 필요 시 클라이언트에 데이터 브로드캐스트
+      io.emit("stm-data", data);
+    });
+
     // 연결 해제 처리
     socket.on("disconnect", () => {
       console.log("유저 연결 해제");
     });
   });
-  // 알람 체크 및 전송
+
+  // 알람 체크 및 전송 시작 (한 번만 실행)
   startAlarmCheck(io);
 };
 
@@ -27,10 +36,10 @@ const startAlarmCheck = (io) => {
     const currentDate = new Date();
     const currentHour = currentDate.getHours();
     const currentMinute = currentDate.getMinutes();
-    const currentSecond = currentDate.getSeconds(); // 현재 초 단위 추가
+    const currentSecond = currentDate.getSeconds();
     const currentDay = currentDate.getDay();
-    let currentAmPm = currentHour >= 12 ? "PM" : "AM"; // 오전/오후 계산
-    const adjustedHour = currentHour % 12 || 12; // 12시간제로 변경
+    let currentAmPm = currentHour >= 12 ? "PM" : "AM";
+    const adjustedHour = currentHour % 12 || 12;
 
     console.log(
       `현재 시각: ${adjustedHour}:${currentMinute}:${currentSecond}, ${currentAmPm}`
@@ -51,37 +60,22 @@ const startAlarmCheck = (io) => {
           `알람 시간 확인: ${alarm.hour}:${alarm.minute} ${alarm.ampmChecker}, 요일: ${alarm.days}`
         );
 
-        // AM/PM을 비교할 때 "오전"을 "AM"으로, "오후"를 "PM"으로 매핑
         const normalizedAmPm = alarm.ampmChecker === "오전" ? "AM" : "PM";
 
-        // 조건별 로그 추가
-        if (alarm.hour === adjustedHour) {
-          console.log("시간 일치");
-        } else {
-          console.log("시간 불일치");
-        }
-        if (normalizedAmPm === currentAmPm) {
-          console.log("AM/PM 일치");
-        } else {
-          console.log("AM/PM 불일치");
-        }
-
-        // 요일 조건 처리 (7은 "매일"을 의미)
         const isDayMatch =
-          alarm.days.includes(currentDay) || alarm.days.includes(7); // 7일 경우 매일로 간주
+          alarm.days.includes(currentDay) || alarm.days.includes(7);
         if (isDayMatch) {
           console.log("요일 일치");
         } else {
           console.log("요일 불일치");
         }
 
-        // ±30초 차이를 고려한 트리거 조건
         if (
           alarm.hour === adjustedHour &&
-          normalizedAmPm === currentAmPm && // 정상적으로 매핑된 값 비교
-          isDayMatch && // 요일 비교 로직에 매일 포함
+          normalizedAmPm === currentAmPm &&
+          isDayMatch &&
           Math.abs(alarm.minute * 60 - (currentMinute * 60 + currentSecond)) <=
-            30 // 분과 초 비교
+            30
         ) {
           console.log("알람 트리거: 알람 시간이 일치합니다!");
           io.emit("alarm-triggered", {
