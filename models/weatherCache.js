@@ -22,7 +22,7 @@ const WeatherCacheSchema = new mongoose.Schema({
   timestamp: {
     type: Date,
     default: Date.now,
-    index: { expires: "1h" }, // TTL 인덱스를 사용하여 1시간 후 자동 삭제
+    // TTL 인덱스 제거
   },
 });
 

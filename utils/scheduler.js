@@ -20,21 +20,30 @@ export const setupScheduler = () => {
 
         switch (type) {
           case "current":
-            url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`;
+            url = `https://api.openweathermap.org/data/2.5/weather`;
             break;
           case "air_quality":
-            url = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+            url = `https://api.openweathermap.org/data/2.5/air_pollution`;
             break;
           case "weekly_forecast":
-            url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`;
+            url = `https://api.openweathermap.org/data/2.5/forecast`;
             break;
           default:
             console.warn(`알 수 없는 타입: ${type}`);
             continue;
         }
 
+        const params = {
+          lat,
+          lon,
+          appid: API_KEY,
+          units: type === "air_quality" ? undefined : "metric",
+          lang: type === "air_quality" ? undefined : "kr",
+        };
+
         try {
-          const data = await fetchWithRetry(url);
+          console.log(`배치 작업: API 호출 - ${url} with params:`, params);
+          const data = await fetchWithRetry({ url, params });
           await WeatherCache.findOneAndUpdate(
             { lat, lon, type },
             { data, timestamp: Date.now() },
@@ -46,6 +55,7 @@ export const setupScheduler = () => {
             `데이터 업데이트 실패: (${lat}, ${lon}, ${type})`,
             error.message
           );
+          // API 호출 실패 시, 기존 캐시 데이터는 유지됩니다.
         }
       }
       console.log("배치 작업: 데이터 업데이트 완료");

@@ -1,3 +1,6 @@
 body {
   background-image: url("/image/bimo.png");
 }
+.my-swal-popup {
+  position: absolute !important; /* fixed 대신 absolute로 변경 */
+}

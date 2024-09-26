@@ -3,14 +3,19 @@ const socket = io("http://localhost:3000"); // WebSocket 연결
 
 const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
 
-// 서버에서 알람 트리거를 받으면 실행
 socket.on("alarm-triggered", (data) => {
   alarmSound.play(); // 알람 소리 재생
 
-  // 알람 확인 메시지 표시, 확인 누르면 알람 소리 중지
-  if (alert(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
+  // SweetAlert2로 알람 확인 메시지 표시
+  Swal.fire({
+    title: "알람",
+    text: `알람 시간: ${data.time}. 알람을 멈추시겠습니까?`,
+    icon: "warning",
+    confirmButtonText: "확인",
+    allowOutsideClick: false, // 사용자가 창 외부를 클릭해도 창이 닫히지 않도록 설정
+  }).then(() => {
     alarmSound.pause(); // 알람 소리 중지
-  }
+  });
 });
 
 let inactivityTimeout;
@@ -183,9 +188,9 @@ function mapWeatherIcon(icon) {
     "02d": "⛅", // 구름 조금 (낮)
     "03d": "☁️", // 구름 많음 (낮)
     "04d": "☁️", // 흐림 (낮)
-    "09d": "🌧", // 소나기 (낮)
-    "10d": "🌦", // 비 (낮)
-    "11d": "⛈", // 천둥번개 (낮)
+    "09d": "🌦️", // 소나기 (낮)
+    "10d": "🌧️", // 비 (낮)
+    "11d": "⛈️", // 천둥번개 (낮)
     "13d": "❄️", // 눈 (낮)
     "50d": "🌫", // 안개 (낮)
     "01n": "🌕", // 맑음 (밤)

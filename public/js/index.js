@@ -1,6 +1,7 @@
 // WebSocket 연결 (서버의 3000 포트)
 const socket = io("http://localhost:3000"); // WebSocket 연결
 const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
+alarmSound.loop = true; // 알람 소리를 계속 반복
 const conversationHistory = [];
 
 // WebSocket 연결 성공 여부 확인
@@ -16,12 +17,41 @@ socket.on("connect_error", (error) => {
 // 서버에서 알람 트리거를 받으면 실행
 socket.on("alarm-triggered", (data) => {
   console.log("알람 트리거 발생: ", data);
-  alarmSound.play(); // 알람 소리 재생
 
-  // 알람 확인 메시지 표시, 확인 누르면 알람 소리 중지
-  if (confirm(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
-    alarmSound.pause(); // 알람 소리 중지
-  }
+  // 알람 소리 재생
+  alarmSound.currentTime = 0; // 알람 소리 처음부터 재생
+  alarmSound
+    .play()
+    .then(() => {
+      console.log("알람 소리 재생 시작");
+    })
+    .catch((error) => {
+      console.error("알람 소리 재생 중 오류 발생:", error);
+    });
+
+  // SweetAlert 모달 표시 (아이콘을 'info'로 변경, 확인 버튼만)
+  Swal.fire({
+    title: "알람",
+    text: `알람 시간: ${data.time}. 알람을 멈추시겠습니까?`,
+    icon: "info", // 아이콘을 'info'로 변경
+    confirmButtonText: "알람 멈추기",
+    showCancelButton: false, // 취소 버튼 숨기기
+    allowOutsideClick: false, // 모달 외부 클릭 방지
+    allowEscapeKey: false, // ESC 키 방지
+    heightAuto: false, // 높이를 자동으로 조정하지 않음
+    backdrop: `
+      rgba(0,0,123,0.4)
+      left top
+      no-repeat
+    `, // 모달 배경 설정 (선택 사항)
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // 사용자가 확인을 누르면 알람 중지
+      console.log("사용자가 알람을 멈췄습니다.");
+      alarmSound.pause();
+      alarmSound.currentTime = 0;
+    }
+  });
 });
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -94,8 +124,8 @@ window.addEventListener("DOMContentLoaded", () => {
         const utterance = new SpeechSynthesisUtterance(aiResponse);
         utterance.lang = "ko-KR";
         utterance.volume = 1;
-        utterance.rate = 1.2; // 속도를 약간 낮춤
-        utterance.pitch = 1.5; // 음 높이를 조절
+        utterance.rate = 1.5; // 속도를 약간 낮춤
+        utterance.pitch = 1.8; // 음 높이를 조절
 
         const voices = speechSynthesis.getVoices();
         const selectedVoice = voices.find((voice) => voice.lang === "ko-KR");
@@ -142,4 +172,5 @@ window.addEventListener("DOMContentLoaded", () => {
     const responseContainer = document.getElementById("gpt-response");
     responseContainer.innerHTML = ""; // 이전 응답 초기화
     responseContainer.innerText = response; // 새 응답 표시
-  };*/
+  };
+*/

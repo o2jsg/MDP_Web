@@ -12,7 +12,7 @@
       <div class="weather-air-quality">
         <div class="weather">
           <div class="temperature">
-            <div id="weather-icon" class="icon">🌞</div>
+            <div id="weather-icon" class="icon">🌈</div>
             <div class="details">
               <div id="temperature" class="temp">24°C</div>
               <div id="weather-status" class="status">맑음</div>
@@ -65,10 +65,11 @@
         </button>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="/js/main.js"></script>
     <script>
-      //const socket = io("http://localhost:3000");
+      /*
       socket.on("connect", () => {
         console.log("소켓 연결 성공");
 
@@ -120,7 +121,7 @@
           .addEventListener("touchstart", () => {
             socket.emit("send-char", "f");
           });
-      });
+      });I*/
     </script>
   </body>
 </html>

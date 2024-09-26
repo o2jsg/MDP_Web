@@ -46,14 +46,26 @@ document.addEventListener("DOMContentLoaded", () => {
     // 알람 소리 재생
     playAlarm();
 
-    // alert 창 표시
-    if (alert(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
-      // 사용자가 확인을 누르면 알람 중지
-      console.log("사용자가 알람을 멈췄습니다.");
-      alarmSound.pause();
-      alarmSound.currentTime = 0;
-      alarmPlaying = false;
-    }
+    // SweetAlert 모달 표시 (확인 버튼만)
+    Swal.fire({
+      title: "알람",
+      text: `알람 시간: ${data.time}. 알람을 멈추시겠습니까?`,
+      icon: "info",
+      confirmButtonText: "알람 멈추기",
+      showCancelButton: false, // 취소 버튼 숨기기
+      allowOutsideClick: false, // 모달 외부 클릭 방지
+      allowEscapeKey: false, // ESC 키 방지
+      scrollbarPadding: false, // 추가
+      heightAuto: false, // 높이를 자동으로 조정하지 않음
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 사용자가 확인을 누르면 알람 중지
+        console.log("사용자가 알람을 멈췄습니다.");
+        alarmSound.pause();
+        alarmSound.currentTime = 0;
+        alarmPlaying = false;
+      }
+    });
   });
 
   // '뒤로가기' 버튼 처리
@@ -70,7 +82,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!ampmPicker || !hourPicker || !minutePicker) {
       console.error("필요한 요소가 선택되지 않았습니다.");
-      alert("시간과 분을 선택해주세요.");
+      // alert 함수 대신 SweetAlert2 사용
+      Swal.fire({
+        icon: "warning",
+        title: "시간 선택",
+        text: "시간과 분을 선택해주세요.",
+        confirmButtonText: "확인",
+        scrollbarPadding: false, // 추가
+        heightAuto: false, // 높이를 자동으로 조정하지 않음
+      });
       return;
     }
 
@@ -95,15 +115,37 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((data) => {
         if (data.success) {
           console.log("알람 저장 완료:", data);
-          alert("알람이 저장되었습니다.");
+          // alert 함수 대신 SweetAlert2 사용
+          Swal.fire({
+            icon: "success",
+            title: "알람 저장",
+            text: "알람이 저장되었습니다.",
+            confirmButtonText: "확인",
+            scrollbarPadding: false, // 추가
+            heightAuto: false, // 높이를 자동으로 조정하지 않음
+          });
           loadAlarms(); // 알람 목록 갱신
         } else {
-          alert("알람 저장에 실패했습니다.");
+          Swal.fire({
+            icon: "error",
+            title: "알람 저장 실패",
+            text: "알람 저장에 실패했습니다.",
+            confirmButtonText: "확인",
+            scrollbarPadding: false, // 추가
+            heightAuto: false, // 높이를 자동으로 조정하지 않음
+          });
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("알람 저장 중 오류가 발생했습니다.");
+        Swal.fire({
+          icon: "error",
+          title: "오류 발생",
+          text: "알람 저장 중 오류가 발생했습니다.",
+          confirmButtonText: "확인",
+          scrollbarPadding: false, // 추가
+          heightAuto: false, // 높이를 자동으로 조정하지 않음
+        });
       });
   });
 
@@ -129,15 +171,37 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((data) => {
         if (data.success) {
           console.log("알람 삭제 완료:", data);
-          alert("알람이 삭제되었습니다.");
+          // alert 함수 대신 SweetAlert2 사용
+          Swal.fire({
+            icon: "success",
+            title: "알람 삭제",
+            text: "알람이 삭제되었습니다.",
+            confirmButtonText: "확인",
+            scrollbarPadding: false, // 추가
+            heightAuto: false, // 높이를 자동으로 조정하지 않음
+          });
           loadAlarms(); // 알람 목록 갱신
         } else {
-          alert("알람 삭제에 실패했습니다.");
+          Swal.fire({
+            icon: "error",
+            title: "알람 삭제 실패",
+            text: "알람 삭제에 실패했습니다.",
+            confirmButtonText: "확인",
+            scrollbarPadding: false, // 추가
+            heightAuto: false, // 높이를 자동으로 조정하지 않음
+          });
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("알람 삭제 중 오류가 발생했습니다.");
+        Swal.fire({
+          icon: "error",
+          title: "오류 발생",
+          text: "알람 삭제 중 오류가 발생했습니다.",
+          confirmButtonText: "확인",
+          scrollbarPadding: false, // 추가
+          heightAuto: false, // 높이를 자동으로 조정하지 않음
+        });
       });
   }
 
@@ -185,7 +249,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentY = 0;
     let isDragging = false;
 
-    ul.style.top = `-${selectedIndex * 50}px`;
+    const itemHeight = 40; // 항목 높이를 40px로 줄임
+    ul.style.top = `-${selectedIndex * itemHeight}px`;
 
     picker.addEventListener("wheel", (event) => {
       event.preventDefault();
@@ -202,8 +267,8 @@ document.addEventListener("DOMContentLoaded", () => {
       currentY = event.touches[0].clientY;
       const deltaY = startY - currentY;
 
-      if (Math.abs(deltaY) > 10) {
-        // 최소 움직임을 10px로 설정
+      if (Math.abs(deltaY) > 5) {
+        // 임계값을 5px로 낮춤
         handleScroll(deltaY > 0 ? 1 : -1);
         startY = currentY; // 새 위치로 시작 지점을 갱신
       }
@@ -219,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedIndex + direction < liElements.length
       ) {
         selectedIndex += direction;
-        ul.style.top = `-${selectedIndex * 50}px`;
+        ul.style.top = `-${selectedIndex * itemHeight}px`;
         updateSelectedClass(liElements, selectedIndex);
       }
     }
@@ -238,16 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPicker("ampmPicker", 0); // 오전부터 설정
 });
 
-function displayAlarms(alarms) {
-  const alarmList = document.getElementById("alarmItems");
-  alarmList.innerHTML = ""; // 기존 알람 목록 초기화
-
-  alarms.forEach((alarm) => {
-    const li = document.createElement("li");
-    li.textContent = `${alarm.hour}:${alarm.minute} ${alarm.ampmChecker}`;
-    alarmList.appendChild(li);
-  });
-}
+// 중복된 displayAlarms 함수 제거
 
 document.querySelectorAll(".picker ul li").forEach((item) => {
   item.addEventListener("click", () => {

@@ -43,6 +43,9 @@
   src: url("/fonts/Freesentation-9Black.ttf");
   font-weight: 900;
 }
+.my-swal-popup {
+  position: absolute !important; /* fixed 대신 absolute로 변경 */
+}
 html {
   margin: 0px;
   padding: 0px;
@@ -56,6 +59,14 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
+}
+html.swal2-shown,
+body.swal2-shown {
+  position: static !important; /* 모달이 떠 있어도 body가 고정되지 않도록 */
+}
+body.swal2-shown {
+  overflow: auto !important;
+  padding-right: 0 !important; /* 스크롤바가 사라질 때 패딩을 강제로 0으로 설정 */
 }
 
 .time-picker {
@@ -80,11 +91,11 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  transition: top 0.3s;
+  transition: top 0.3s ease;
 }
 
 .picker li {
-  height: 50px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;

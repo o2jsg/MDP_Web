@@ -43,6 +43,9 @@
   src: url("/fonts/Freesentation-9Black.ttf");
   font-weight: 900;
 }
+.my-swal-popup {
+  position: absolute !important; /* fixed 대신 absolute로 변경 */
+}
 
 body {
   font-family: "freesentation", Arial, sans-serif;
