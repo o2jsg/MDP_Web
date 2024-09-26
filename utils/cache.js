@@ -1,7 +1,7 @@
 // utils/cache.js
 import { WeatherCache } from "../models/weatherCache.js";
 
-const CACHE_TTL = 3600000; // 1시간 (밀리초 단위)
+const CACHE_TTL = 1800000; // 30분 (밀리초 단위)
 
 export async function getCachedData(lat, lon, type) {
   try {
