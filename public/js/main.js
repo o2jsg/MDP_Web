@@ -23,7 +23,7 @@ let inactivityTimeout;
 function pageRollbackTimer() {
   inactivityTimeout = setTimeout(() => {
     history.back();
-  }, 20000);
+  }, 15000);
 }
 
 function resetTimer() {

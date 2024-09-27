@@ -5,7 +5,8 @@ import fetchWithRetry from "./fetchWithRetry.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-const API_KEY = process.env.OPENWEATHER_API_KEY;
+const API_KEY =
+  process.env.OPENWEATHER_API_KEY || process.env.OPENWEATHER_API_KEY;
 
 // 배치 작업 설정: 매 시간 정각에 실행
 export const setupScheduler = () => {

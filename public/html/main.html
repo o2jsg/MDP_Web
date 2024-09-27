@@ -14,16 +14,16 @@
           <div class="temperature">
             <div id="weather-icon" class="icon">🌈</div>
             <div class="details">
-              <div id="temperature" class="temp">24°C</div>
+              <div id="temperature" class="temp">25°C</div>
               <div id="weather-status" class="status">맑음</div>
             </div>
           </div>
           <div class="extra">
             <div id="humidity" class="humidity">
-              습도<br /><strong>60%</strong>
+              습도<br /><strong>69%</strong>
             </div>
             <div id="air-quality" class="fine-dust">
-              미세먼지<br /><strong>12 µg/m³</strong>
+              미세먼지<br /><strong>좋음</strong>
             </div>
           </div>
         </div>
@@ -69,7 +69,6 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="/js/main.js"></script>
     <script>
-      /*
       socket.on("connect", () => {
         console.log("소켓 연결 성공");
 
@@ -121,7 +120,7 @@
           .addEventListener("touchstart", () => {
             socket.emit("send-char", "f");
           });
-      });I*/
+      });
     </script>
   </body>
 </html>

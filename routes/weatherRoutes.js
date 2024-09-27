@@ -5,7 +5,7 @@ import { getCachedData, setCachedData } from "../utils/cache.js";
 import { WeatherCache } from "../models/weatherCache.js"; // 추가
 
 const router = express.Router();
-const API_KEY = process.env.OPEN_WEATHER_API;
+const API_KEY = process.env.OPEN_WEATHER_API || process.env.OPENWEATHER_API;
 
 // 현재 날씨 라우트
 router.get("/current", async (req, res) => {
