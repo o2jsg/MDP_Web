@@ -35,7 +35,7 @@ export const getOpenAIResponse = async (prompt, history) => {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: "ft:gpt-4o-mini-2024-07-18:personal:aigov4:ABXr7jBq", // 파인튜닝한 모델 사용
+      model: "ft:gpt-4o-mini-2024-07-18:personal:aigov8:ACFsYARV", // 파인튜닝한 모델 사용
       messages: messages,
       max_tokens: 2048,
       temperature: 1, // 보다 자연스러운 대화를 위해 약간 낮춘 온도값
