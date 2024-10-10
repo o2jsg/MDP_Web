@@ -1,47 +1,50 @@
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-1Thin.ttf");
+  src: url("/fonts/Freesentation-1Thin.ttf");
   font-weight: 100;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-2ExtraLight.ttf");
+  src: url("/fonts/Freesentation-2ExtraLight.ttf");
   font-weight: 200;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-3Light.ttf");
+  src: url("/fonts/Freesentation-3Light.ttf");
   font-weight: 300;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-4Regular.ttf");
+  src: url("/fonts/Freesentation-4Regular.ttf");
   font-weight: 400;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-5Medium.ttf");
+  src: url("/fonts/Freesentation-5Medium.ttf");
   font-weight: 500;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-6SemiBold.ttf");
+  src: url("/fonts/Freesentation-6SemiBold.ttf");
   font-weight: 600;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-7Bold.ttf");
+  src: url("/fonts/Freesentation-7Bold.ttf");
   font-weight: 700;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-8ExtraBold.ttf");
+  src: url("/fonts/Freesentation-8ExtraBold.ttf");
   font-weight: 800;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-9Black.ttf");
+  src: url("/fonts/Freesentation-9Black.ttf");
   font-weight: 900;
+}
+.my-swal-popup {
+  position: absolute !important; /* fixed 대신 absolute로 변경 */
 }
 
 body {

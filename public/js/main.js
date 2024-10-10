@@ -1,18 +1,21 @@
 // WebSocket 연결 (서버의 3001 포트)
-const socket = io("http://localhost:3001"); // WebSocket 연결
+const socket = io("http://localhost:3000"); // WebSocket 연결
 
-const alarmSound = new Audio(
-  "../assets/music/약-드실시간이에요_-마지막-톤업.mp3"
-); // 알람 소리 파일
+const alarmSound = new Audio("/music/medicine.mp3"); // 알람 소리 파일
 
-// 서버에서 알람 트리거를 받으면 실행
 socket.on("alarm-triggered", (data) => {
   alarmSound.play(); // 알람 소리 재생
 
-  // 알람 확인 메시지 표시, 확인 누르면 알람 소리 중지
-  if (confirm(`알람 시간: ${data.time}. 알람을 멈추시겠습니까?`)) {
+  // SweetAlert2로 알람 확인 메시지 표시
+  Swal.fire({
+    title: "알람",
+    text: `알람 시간: ${data.time}. 알람을 멈추시겠습니까?`,
+    icon: "warning",
+    confirmButtonText: "확인",
+    allowOutsideClick: false, // 사용자가 창 외부를 클릭해도 창이 닫히지 않도록 설정
+  }).then(() => {
     alarmSound.pause(); // 알람 소리 중지
-  }
+  });
 });
 
 let inactivityTimeout;
@@ -35,7 +38,54 @@ window.addEventListener("load", pageRollbackTimer);
 
 const DEFAULT_LAT = 37.46369169; // 인천 미추홀구의 위도
 const DEFAULT_LON = 126.6502972; // 인천 미추홀구의 경도
-const API_KEY = "2496a945d5aba6b1ae5b53ddecb57bcd"; // OpenWeather API 키를 여기에 입력
+
+async function fetchWeather(lat, lon) {
+  const url = `/api/weather/current?lat=${lat}&lon=${lon}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`서버 응답 에러: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("날씨 데이터 가져오기 성공", data);
+    displayCurrentWeather(data);
+  } catch (error) {
+    console.error("날씨 데이터를 가져오는 중 오류가 발생했습니다.", error);
+    showErrorMessage("날씨 데이터를 가져오는 데 실패했습니다.");
+  }
+}
+
+async function fetchAirQuality(lat, lon) {
+  const url = `/api/weather/air_quality?lat=${lat}&lon=${lon}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`서버 응답 에러: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("미세먼지 데이터 가져오기 성공", data);
+    displayAirQuality(data.list[0].components.pm2_5);
+  } catch (error) {
+    console.error("미세먼지 데이터를 가져오는 중 오류가 발생했습니다.", error);
+    showErrorMessage("미세먼지 데이터를 가져오는 데 실패했습니다.");
+  }
+}
+
+async function fetchWeeklyForecast(lat, lon) {
+  const url = `/api/weather/weekly_forecast?lat=${lat}&lon=${lon}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`서버 응답 에러: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("주간 날씨 데이터 가져오기 성공", data);
+    processWeeklyForecast(data.list);
+  } catch (error) {
+    console.error("주간 날씨 데이터를 가져오는 중 오류가 발생했습니다.", error);
+    showErrorMessage("주간 날씨 데이터를 가져오는 데 실패했습니다.");
+  }
+}
 
 function getCoordinatesAndFetchWeather() {
   if (navigator.geolocation) {
@@ -63,57 +113,6 @@ function getCoordinatesAndFetchWeather() {
   }
 }
 
-async function fetchWeather(lat, lon) {
-  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`;
-
-  try {
-    console.log(`API 호출: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`API 응답 에러: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log("날씨 데이터 가져오기 성공", data);
-    displayCurrentWeather(data);
-  } catch (error) {
-    console.error("날씨 데이터를 가져오는 중 오류가 발생했습니다.", error);
-  }
-}
-
-async function fetchAirQuality(lat, lon) {
-  const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
-
-  try {
-    console.log(`미세먼지 API 호출: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`미세먼지 API 응답 에러: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log("미세먼지 데이터 가져오기 성공", data);
-    displayAirQuality(data.list[0].components.pm2_5);
-  } catch (error) {
-    console.error("미세먼지 데이터를 가져오는 중 오류가 발생했습니다.", error);
-  }
-}
-
-async function fetchWeeklyForecast(lat, lon) {
-  const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`;
-
-  try {
-    console.log(`주간 날씨 API 호출: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`주간 날씨 API 응답 에러: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log("주간 날씨 데이터 가져오기 성공", data);
-    processWeeklyForecast(data.list);
-  } catch (error) {
-    console.error("주간 날씨 데이터를 가져오는 중 오류가 발생했습니다.", error);
-  }
-}
-
 function processWeeklyForecast(list) {
   const dailyData = {};
 
@@ -138,10 +137,6 @@ function processWeeklyForecast(list) {
   forecastContainer.innerHTML = "";
 
   Object.keys(dailyData).forEach((day, index) => {
-    const currentDay = new Date().toLocaleDateString("ko-KR", {
-      weekday: "long",
-    });
-
     if (index > 0 && index < 6) {
       // 오늘 이후부터 5일간의 데이터만 표시
       const avgTemp = (dailyData[day].temp / dailyData[day].count).toFixed(1);
@@ -193,9 +188,9 @@ function mapWeatherIcon(icon) {
     "02d": "⛅", // 구름 조금 (낮)
     "03d": "☁️", // 구름 많음 (낮)
     "04d": "☁️", // 흐림 (낮)
-    "09d": "🌧", // 소나기 (낮)
-    "10d": "🌦", // 비 (낮)
-    "11d": "⛈", // 천둥번개 (낮)
+    "09d": "🌦️", // 소나기 (낮)
+    "10d": "🌧️", // 비 (낮)
+    "11d": "⛈️", // 천둥번개 (낮)
     "13d": "❄️", // 눈 (낮)
     "50d": "🌫", // 안개 (낮)
     "01n": "🌕", // 맑음 (밤)
@@ -228,6 +223,14 @@ function displayAirQuality(pm25) {
   document.getElementById(
     "air-quality"
   ).innerHTML = `미세먼지<br /><strong>${pm25} µg/m³ (${airQuality})</strong>`;
+}
+
+function showErrorMessage(message) {
+  const errorDiv = document.getElementById("error");
+  if (errorDiv) {
+    errorDiv.textContent = message;
+    errorDiv.style.display = "block";
+  }
 }
 
 // 최초로 날씨 정보와 미세먼지 정보 및 주간 날씨 가져오기

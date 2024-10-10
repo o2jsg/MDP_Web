@@ -1,47 +1,50 @@
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-1Thin.ttf");
+  src: url("/fonts/Freesentation-1Thin.ttf");
   font-weight: 100;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-2ExtraLight.ttf");
+  src: url("/fonts/Freesentation-2ExtraLight.ttf");
   font-weight: 200;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-3Light.ttf");
+  src: url("/fonts/Freesentation-3Light.ttf");
   font-weight: 300;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-4Regular.ttf");
+  src: url("/fonts/Freesentation-4Regular.ttf");
   font-weight: 400;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-5Medium.ttf");
+  src: url("/fonts/Freesentation-5Medium.ttf");
   font-weight: 500;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-6SemiBold.ttf");
+  src: url("/fonts/Freesentation-6SemiBold.ttf");
   font-weight: 600;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-7Bold.ttf");
+  src: url("/fonts/Freesentation-7Bold.ttf");
   font-weight: 700;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-8ExtraBold.ttf");
+  src: url("/fonts/Freesentation-8ExtraBold.ttf");
   font-weight: 800;
 }
 @font-face {
   font-family: "freesentation";
-  src: url("../assets/fonts/Freesentation-9Black.ttf");
+  src: url("/fonts/Freesentation-9Black.ttf");
   font-weight: 900;
+}
+.my-swal-popup {
+  position: absolute !important; /* fixed 대신 absolute로 변경 */
 }
 html {
   margin: 0px;
@@ -56,6 +59,14 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
+}
+html.swal2-shown,
+body.swal2-shown {
+  position: static !important; /* 모달이 떠 있어도 body가 고정되지 않도록 */
+}
+body.swal2-shown {
+  overflow: auto !important;
+  padding-right: 0 !important; /* 스크롤바가 사라질 때 패딩을 강제로 0으로 설정 */
 }
 
 .time-picker {
@@ -80,11 +91,11 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  transition: top 0.3s;
+  transition: top 0.3s ease;
 }
 
 .picker li {
-  height: 50px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -97,7 +108,25 @@ body {
   opacity: 1;
   font-weight: bold;
 }
-
+.deleteButton {
+  border-radius: 10px;
+  font-weight: 700;
+  color: white;
+  background-color: #20c997;
+  border: none;
+  font-size: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-left: 15px;
+  padding: 4px 15px;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+.backbutton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  cursor: pointer;
+}
 .button {
   border-radius: 50px;
 }

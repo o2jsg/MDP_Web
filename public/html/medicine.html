@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>약 알리미</title>
+    <link rel="icon" href="/image/bimoicon.png" />
+    <link rel="stylesheet" href="/css/medicine.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+  </head>
+  <body>
+    <div id="wrap">
+      <div
+        id="backButton"
+        style="position: absolute; top: 10px; left: 10px; cursor: pointer"
+      >
+        <span style="font-size: 20px">← 뒤로가기</span>
+      </div>
+      <div class="time-picker">
+        <div class="picker" id="ampmPicker">
+          <ul>
+            <li>오전</li>
+            <li>오후</li>
+          </ul>
+        </div>
+        <div class="picker" id="hourPicker">
+          <ul id="hourSettings"></ul>
+        </div>
+        <span>:</span>
+        <div class="picker" id="minutePicker">
+          <ul id="minuteSettings"></ul>
+        </div>
+        <button class="time-picker__button" id="setAlarmButton">저장</button>
+      </div>
+
+      <form id="alarmForm">
+        <label for="alarmDays">요일:</label>
+        <div id="alarmDays">
+          <label><input type="checkbox" value="1" />월요일</label>
+          <label><input type="checkbox" value="2" />화요일</label>
+          <label><input type="checkbox" value="3" />수요일</label>
+          <label><input type="checkbox" value="4" />목요일</label>
+          <label><input type="checkbox" value="5" />금요일</label>
+          <label class="saturday"
+            ><input type="checkbox" value="6" />토요일</label
+          >
+          <label class="monday"
+            ><input type="checkbox" value="0" />일요일</label
+          >
+        </div>
+      </form>
+
+      <div id="alarmList">
+        <h3>설정된 알람</h3>
+        <ul id="alarmItems"></ul>
+      </div>
+
+      <!-- 음성 파일 -->
+      <audio id="alarmSound" src="/music/medicine.mp3"></audio>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="/js/alarm.js"></script>
+  </body>
+</html>
